@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stylised printer: frame, gantry and nozzle -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="5"
+        android:pathData="M34,34 h40 v40 h-40 z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M34,46 h40 v4 h-40 z" />
+    <path android:fillColor="#FF8BC34A" android:pathData="M50,50 h8 v6 l-4,5 l-4,-5 z" />
+    <path android:fillColor="#FF8BC34A" android:pathData="M44,66 h20 v4 h-20 z" />
+</vector>

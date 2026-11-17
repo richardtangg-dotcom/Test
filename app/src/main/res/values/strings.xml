@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Bambu Live</string>
+    <string name="widget_name">Bambu P2S live</string>
+    <string name="widget_description">Utskriftsstatus och kamerabild från din Bambu Lab-skrivare</string>
+</resources>
