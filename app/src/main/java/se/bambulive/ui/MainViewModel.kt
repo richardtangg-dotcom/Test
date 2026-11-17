@@ -70,6 +70,20 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** För konton som loggar in med Google/Apple: inget lösenord, bara en kod via e-post. */
+    fun startEmailCodeLogin(email: String, region: String) = run {
+        prefs.region = region
+        prefs.email = email.trim()
+        cloud.requestEmailCode(email.trim())
+        screen = Screen.Code(email.trim(), null)
+    }
+
+    /** Reservväg: klistra in en token (cookien "token" från bambulab.com). */
+    fun loginWithToken(token: String, region: String) = run {
+        prefs.region = region
+        finishLogin(token.trim().removePrefix("Bearer ").trim())
+    }
+
     fun resendCode() {
         val s = screen as? Screen.Code ?: return
         if (s.tfaKey == null) run { cloud.requestEmailCode(s.email) }

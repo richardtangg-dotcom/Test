@@ -62,6 +62,9 @@ private fun LoginScreen(vm: MainViewModel) {
     var email by rememberSaveable { mutableStateOf(vm.prefs.email ?: "") }
     var password by remember { mutableStateOf("") }
     var region by rememberSaveable { mutableStateOf(vm.prefs.region) }
+    var usePassword by rememberSaveable { mutableStateOf(false) }
+    var showToken by rememberSaveable { mutableStateOf(false) }
+    var token by remember { mutableStateOf("") }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -74,31 +77,57 @@ private fun LoginScreen(vm: MainViewModel) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         OutlinedTextField(
-            email, { email = it }, label = { Text("E-post") }, singleLine = true,
+            email, { email = it }, label = { Text("E-post (samma som ditt Google-konto)") }, singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            password, { password = it }, label = { Text("Lösenord") }, singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(region == "global", { region = "global" }, label = { Text("Global") })
             FilterChip(region == "china", { region = "china" }, label = { Text("Kina") })
         }
-        ErrorText(vm.error)
-        Button(
-            onClick = { vm.login(email, password, region) },
-            enabled = !vm.busy && email.isNotBlank() && password.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) { if (vm.busy) CircularProgressIndicator(Modifier.height(20.dp)) else Text("Logga in") }
-        Text(
-            "Lösenordet sparas inte – bara den inloggningstoken som Bambu Cloud ger tillbaka.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (!usePassword) {
+            ErrorText(vm.error)
+            Button(
+                onClick = { vm.startEmailCodeLogin(email, region) },
+                enabled = !vm.busy && email.contains('@'),
+                modifier = Modifier.fillMaxWidth(),
+            ) { if (vm.busy) CircularProgressIndicator(Modifier.height(20.dp)) else Text("Skicka inloggningskod till e-post") }
+            Text(
+                "Fungerar även om du loggar in med Google eller Apple i Bambu Handy – du behöver inget lösenord.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(onClick = { usePassword = true; vm.error = null }) { Text("Logga in med lösenord i stället") }
+        } else {
+            OutlinedTextField(
+                password, { password = it }, label = { Text("Lösenord") }, singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            ErrorText(vm.error)
+            Button(
+                onClick = { vm.login(email, password, region) },
+                enabled = !vm.busy && email.isNotBlank() && password.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) { if (vm.busy) CircularProgressIndicator(Modifier.height(20.dp)) else Text("Logga in") }
+            TextButton(onClick = { usePassword = false; vm.error = null }) { Text("Logga in med e-postkod i stället") }
+        }
+
+        TextButton(onClick = { showToken = !showToken }) { Text(if (showToken) "Dölj avancerat" else "Avancerat: klistra in token") }
+        if (showToken) {
+            Text(
+                "Om kodinloggningen inte fungerar: logga in på bambulab.com i en webbläsare och kopiera värdet av cookien \"token\".",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedTextField(token, { token = it }, label = { Text("Token") }, modifier = Modifier.fillMaxWidth())
+            Button(
+                onClick = { vm.loginWithToken(token, region) },
+                enabled = !vm.busy && token.length > 20,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Logga in med token") }
+        }
     }
 }
 
