@@ -19,7 +19,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
 import se.bambulive.data.ImageStore
 import se.bambulive.data.Prefs
@@ -59,7 +58,7 @@ class MonitorService : Service() {
     private fun startUpdating() {
         scope.launch {
             var lastJob: String? = null
-            PrinterRepository.state.conflate().collect { state ->
+            PrinterRepository.state.collect { state ->
                 WidgetUpdater.push(this@MonitorService, state)
                 getSystemService(NotificationManager::class.java)
                     .notify(NOTIF_ID, buildNotification(state))
