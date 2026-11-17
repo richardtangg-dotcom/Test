@@ -52,6 +52,12 @@ class BambuCloud(region: String) {
             val body = resp.body?.string().orEmpty()
             val obj = runCatching { JSONObject(body) }.getOrElse { JSONObject() }
             if (!resp.isSuccessful) {
+                if (body.trimStart().startsWith("<")) {
+                    throw IOException(
+                        "Bambu Lab (Cloudflare) blockerade anropet (${resp.code}). " +
+                            "Använd \"Logga in via Bambu Lab-webben\" i stället."
+                    )
+                }
                 val msg = obj.optString("message").ifBlank { obj.optString("error") }.ifBlank { body.take(200) }
                 throw IOException(
                     when (resp.code) {
@@ -105,6 +111,14 @@ class BambuCloud(region: String) {
         }?.let { return it }
         return obj.optString("accessToken").ifBlank { throw IOException("Tvåstegskoden godtogs inte") }
     }
+
+    /** Token är en JWT; användarnamnet (u_<uid>) står i den, så vi slipper ett API-anrop. */
+    fun uidFromToken(token: String): String? = runCatching {
+        val part = token.split('.').getOrNull(1) ?: return null
+        val json = JSONObject(String(android.util.Base64.decode(part, android.util.Base64.URL_SAFE or android.util.Base64.NO_PADDING or android.util.Base64.NO_WRAP)))
+        json.optString("username").takeIf { it.startsWith("u_") }?.removePrefix("u_")
+            ?: json.opt("uid")?.toString()?.takeIf { it.isNotBlank() && it != "null" }
+    }.getOrNull()
 
     /** Användar-ID behövs som MQTT-användarnamn (u_<uid>). */
     suspend fun fetchUid(token: String): String {

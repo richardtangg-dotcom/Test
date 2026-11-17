@@ -23,6 +23,8 @@ sealed interface Screen {
     data class Code(val email: String, val tfaKey: String?) : Screen
     data class Devices(val devices: List<CloudDevice>) : Screen
     data object Dashboard : Screen
+    data object WebLogin : Screen
+    data class ManualDevice(val reason: String?) : Screen
 }
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
@@ -105,11 +107,40 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     private suspend fun finishLogin(token: String) {
         prefs.token = token
-        prefs.uid = cloud.fetchUid(token)
-        fetchDevices()
+        prefs.uid = cloud.uidFromToken(token) ?: cloud.fetchUid(token)
+        try {
+            fetchDevices()
+        } catch (e: Exception) {
+            // Enhetslistan kan blockeras av Cloudflare – då får man skriva in serienumret själv.
+            screen = Screen.ManualDevice(e.message)
+        }
     }
 
-    fun loadDevices() = run { fetchDevices() }
+    fun openWebLogin(region: String) {
+        prefs.region = region
+        error = null
+        screen = Screen.WebLogin
+    }
+
+    /** Anropas när webbinloggningen satt kakan "token". */
+    fun onWebToken(token: String) = run { finishLogin(token) }
+
+    fun addManualDevice(serial: String, name: String, accessCode: String) {
+        select(
+            CloudDevice(
+                id = serial.trim().uppercase(), name = name.trim().ifBlank { "P2S" }, model = "P2S",
+                online = true, printStatus = "", accessCode = accessCode.trim().ifBlank { null },
+            )
+        )
+    }
+
+    fun loadDevices() = run {
+        try {
+            fetchDevices()
+        } catch (e: Exception) {
+            screen = Screen.ManualDevice(e.message)
+        }
+    }
 
     private suspend fun fetchDevices() {
         val devices = cloud.fetchDevices(prefs.token ?: return)

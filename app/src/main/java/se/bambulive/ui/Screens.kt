@@ -20,6 +20,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,6 +48,8 @@ fun AppRoot(vm: MainViewModel = viewModel()) {
                 is Screen.Code -> CodeScreen(vm, s)
                 is Screen.Devices -> DevicesScreen(vm, s)
                 Screen.Dashboard -> DashboardScreen(vm)
+                Screen.WebLogin -> WebLoginScreen(vm)
+                is Screen.ManualDevice -> ManualDeviceScreen(vm, s)
             }
         }
     }
@@ -85,13 +88,24 @@ private fun LoginScreen(vm: MainViewModel) {
             FilterChip(region == "global", { region = "global" }, label = { Text("Global") })
             FilterChip(region == "china", { region = "china" }, label = { Text("Kina") })
         }
+        ErrorText(vm.error)
+        Button(
+            onClick = { vm.openWebLogin(region) },
+            enabled = !vm.busy,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Logga in via Bambu Lab-webben") }
+        Text(
+            "Rekommenderas. Välj \"logga in med kod\" på sidan om du har Google-konto (Google tillåter inte inloggning i inbäddade webbläsare).",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text("Andra sätt", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 12.dp))
         if (!usePassword) {
-            ErrorText(vm.error)
-            Button(
+            OutlinedButton(
                 onClick = { vm.startEmailCodeLogin(email, region) },
                 enabled = !vm.busy && email.contains('@'),
                 modifier = Modifier.fillMaxWidth(),
-            ) { if (vm.busy) CircularProgressIndicator(Modifier.height(20.dp)) else Text("Skicka inloggningskod till e-post") }
+            ) { Text("Skicka inloggningskod till e-post") }
             Text(
                 "Fungerar även om du loggar in med Google eller Apple i Bambu Handy – du behöver inget lösenord.",
                 style = MaterialTheme.typography.bodySmall,
@@ -105,7 +119,6 @@ private fun LoginScreen(vm: MainViewModel) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
             )
-            ErrorText(vm.error)
             Button(
                 onClick = { vm.login(email, password, region) },
                 enabled = !vm.busy && email.isNotBlank() && password.isNotBlank(),
@@ -179,6 +192,34 @@ private fun DevicesScreen(vm: MainViewModel, s: Screen.Devices) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ManualDeviceScreen(vm: MainViewModel, s: Screen.ManualDevice) {
+    var serial by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("P2S") }
+    var code by rememberSaveable { mutableStateOf("") }
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Lägg till skrivaren", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text("Du är inloggad, men skrivarlistan kunde inte hämtas från Bambu Cloud. Skriv in uppgifterna från skrivarens skärm (Inställningar → Enhet / Nätverk).")
+        s.reason?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        OutlinedTextField(serial, { serial = it }, label = { Text("Serienummer") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(name, { name = it }, label = { Text("Namn") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(code, { code = it }, label = { Text("Åtkomstkod (för kameran)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        ErrorText(vm.error)
+        Button(
+            onClick = { vm.addManualDevice(serial, name, code) },
+            enabled = serial.trim().length >= 8,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Spara") }
+        Row {
+            TextButton(onClick = vm::loadDevices, enabled = !vm.busy) { Text("Försök hämta listan igen") }
+            TextButton(onClick = vm::logout) { Text("Logga ut") }
         }
     }
 }
