@@ -123,7 +123,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Anropas när webbinloggningen satt kakan "token". */
-    fun onWebToken(token: String) = run { finishLogin(token) }
+    fun onWebToken(token: String) = run {
+        prefs.token = token
+        finishLogin(token)
+    }
+
+    /** Försök igen med den token vi redan fått, utan att logga in på nytt. */
+    fun retryWithSavedToken() {
+        val t = prefs.token ?: return backToLogin()
+        run { finishLogin(t) }
+    }
 
     fun addManualDevice(serial: String, name: String, accessCode: String) {
         select(

@@ -38,10 +38,10 @@ class BambuCloud(region: String) {
     private val json = "application/json".toMediaType()
 
     private fun Request.Builder.bblHeaders(token: String? = null) = apply {
-        header("User-Agent", "bambu_network_agent/01.09.05.01")
-        header("X-BBL-Client-Name", "OrcaSlicer")
+        // Bambu ber tredjepartsappar att identifiera sig med en egen User-Agent
+        // (gamla "bambu_network_agent/01.09.*" blockeras av deras Cloudflare sedan nov 2026).
+        header("User-Agent", "bambulive-android/${se.bambulive.BuildConfig.VERSION_NAME}")
         header("X-BBL-Client-Type", "slicer")
-        header("X-BBL-Client-Version", "01.09.05.51")
         header("X-BBL-Language", "sv-SE")
         header("Accept", "application/json")
         if (token != null) header("Authorization", "Bearer $token")
@@ -54,8 +54,7 @@ class BambuCloud(region: String) {
             if (!resp.isSuccessful) {
                 if (body.trimStart().startsWith("<")) {
                     throw IOException(
-                        "Bambu Lab (Cloudflare) blockerade anropet (${resp.code}). " +
-                            "Använd \"Logga in via Bambu Lab-webben\" i stället."
+                        "Bambu Labs Cloudflare-skydd blockerade anropet (${resp.code}, ${req.url.encodedPath})."
                     )
                 }
                 val msg = obj.optString("message").ifBlank { obj.optString("error") }.ifBlank { body.take(200) }

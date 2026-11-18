@@ -65,10 +65,20 @@ fun WebLoginScreen(vm: MainViewModel) {
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f).padding(8.dp),
             )
-            if (done || vm.busy) CircularProgressIndicator(Modifier.padding(8.dp))
+            if (vm.busy) CircularProgressIndicator(Modifier.padding(8.dp))
             TextButton(onClick = vm::backToLogin) { Text("Avbryt") }
         }
-        ErrorText(vm.error)
+        if (done && vm.error != null && !vm.busy) {
+            Column(Modifier.fillMaxSize().padding(24.dp)) {
+                ErrorText(vm.error)
+                Text("Inloggningen på webben lyckades, men nästa steg mot Bambu Cloud misslyckades.")
+                androidx.compose.material3.Button(
+                    onClick = vm::retryWithSavedToken,
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                ) { Text("Försök igen") }
+            }
+            return@Column
+        }
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
