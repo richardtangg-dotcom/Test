@@ -19,16 +19,19 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Bygg
         run: ./gradlew --no-daemon assembleDebug
-      - name: Döp om APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk BambuLive.apk
+      - name: Döp om APK med versionsnummer
+        run: |
+          VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          cp app/build/outputs/apk/debug/app-debug.apk "BambuLive-$VERSION.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: BambuLive-apk
-          path: BambuLive.apk
+          name: BambuLive-${{ env.VERSION }}
+          path: BambuLive-${{ env.VERSION }}.apk
       - name: Publicera som release (lätt att ladda ner från mobilen)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-${{ github.ref_name == 'main' && 'latest' || 'dev' }}
           name: Bambu Live (${{ github.ref_name }})
           prerelease: true
-          files: BambuLive.apk
+          files: BambuLive-${{ env.VERSION }}.apk
