@@ -8,6 +8,7 @@ Kåpan låses på kabeln med en ihålig plastskruv med väldigt grov trapetsgän
 | Fil | Innehåll |
 |---|---|
 | `takkapa.scad` | Parametrisk OpenSCAD-modell |
+| `takkapa.3mf` | Färdig utskriftsplatta med båda delarna (220×220 mm), rätt vända |
 | `kapa.stl` | Kåpan, redan vänd för utskrift: **takkanten på bädden**, ingen support |
 | `skruv.stl` | Plastskruven: skallen på bädden, ingen support |
 | `snitt.png`, `render.png` | Snitt i monterat läge / 3D-vy |
