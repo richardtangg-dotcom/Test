@@ -8,12 +8,14 @@
 | `melting_chair.stl` | Samma modell som STL |
 | `generate.py` | Parametrisk generator (SDF → marching cubes), kör om för att ändra detaljer |
 
-**Mått:** ca 131 × 115 × 130 mm (B × D × H) · ca 132 cm³ solid volym · 450 k trianglar · vattentät, en enda kropp.
+**Mått:** ca 134 × 122 × 132 mm (B × D × H) · ca 170 cm³ solid volym · 500 k trianglar · vattentät, en enda kropp.
+
+**Form:** sits och rygg är ett sammanhängande böjt skal (som en riktig plaststol) med 4 långa solfjäderformade ryggspår och 4 sitsspår. Ryggens överkant är bågformad och rullar mjukt ner i sluttande armstöd. Ryggribborna rinner ut över sitsen, framkanten är en tjock, hängande kant med få men tunga droppar (den längsta ca 3 cm), höger axel har sjunkit ihop, en smält sträng går mellan höger armstöd och sitsen och benen flyter ut i stora flikiga pölar.
 
 ## Rekommenderade inställningar (PLA, 0,4 mm munstycke)
 - **Lagerhöjd:** 0,12 mm (Fine) – droppar och rundningar blir mjuka. 0,16 mm går också.
 - **Väggar:** 3 · **Infill:** 10–15 % gyroid.
-- **Stöd:** *Tree (auto)*, tröskelvinkel 30°. Behövs under sitsen, armstöden, ryggstödets bakkant och under varje dropps runda spets. Alla droppar på sits och armar hänger fritt över byggplattan, så stödet blir lätt att bryta bort.
+- **Stöd:** *Tree (auto)*, tröskelvinkel 30°. Behövs under sitsen, armstöden, ryggstödets bakkant och under varje dropps runda spets. Tillåt stöd på modellen (inte bara på plattan): dropparna under höger armstöd och axeln hänger ovanför sitsen.
 - **Platta:** fötterna är platta ”pölar” med stor kontaktyta – ingen brim behövs normalt.
 - **Glans som på bilden:** vit silk-PLA, eller slipa + spraya med blank klarlack.
 
